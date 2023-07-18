@@ -58,8 +58,7 @@
     "test:func:light": "BABEL_ENV=development HLSJS_LIGHT=1 mocha --require @babel/register tests/functional/auto/setup.js --timeout 40000 --exit",
     "test:func:sauce": "SAUCE=1 UA=safari OS='OS X 10.15' BABEL_ENV=development mocha --require @babel/register tests/functional/auto/setup.js --timeout 40000 --exit",
     "type-check": "tsc --noEmit",
-    "type-check:watch": "npm run type-check -- --watch",
-    "prepare": "husky install"
+    "type-check:watch": "npm run type-check -- --watch"
   },
   "devDependencies": {
     "@babel/core": "7.22.9",
@@ -101,7 +100,6 @@
     "eslint-plugin-promise": "6.1.1",
     "eventemitter3": "5.0.1",
     "http-server": "14.1.1",
-    "husky": "8.0.3",
     "jsonpack": "1.1.5",
     "karma": "6.4.2",
     "karma-chrome-launcher": "3.2.0",
