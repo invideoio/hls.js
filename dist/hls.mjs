@@ -403,7 +403,7 @@ function enableLogs(debugConfig, id) {
     // Some browsers don't allow to use bind on console object anyway
     // fallback to default if needed
     try {
-      exportedLogger.log(`Debug logs enabled for "${id}" in hls.js version ${undefined}`);
+      exportedLogger.log(`Debug logs enabled for "${id}" in hls.js version ${"1.0.0"}`);
     } catch (e) {
       exportedLogger = fakeLogger;
     }
@@ -25486,7 +25486,7 @@ class Hls {
    * Get the video-dev/hls.js package version.
    */
   static get version() {
-    return undefined;
+    return "1.0.0";
   }
 
   /**
