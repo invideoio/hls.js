@@ -19,7 +19,8 @@ class XhrLoader implements Loader<LoaderContext> {
     | null;
   private requestTimeout?: number;
   private retryTimeout?: number;
-  private retryDelay: number;
+  private errorRetryTimeout: number = 8000;
+  private retryDelay: number | undefined;
   private config: LoaderConfiguration | null = null;
   private callbacks: LoaderCallbacks<LoaderContext> | null = null;
   public context: LoaderContext | null = null;
@@ -30,7 +31,8 @@ class XhrLoader implements Loader<LoaderContext> {
   constructor(config: HlsConfig) {
     this.xhrSetup = config ? config.xhrSetup || null : null;
     this.stats = new LoadStats();
-    this.retryDelay = 0;
+    this.errorRetryTimeout =
+      config.fragLoadPolicy.default.errorRetry?.retryDelayMs || 8000;
   }
 
   destroy() {
@@ -193,7 +195,7 @@ class XhrLoader implements Loader<LoaderContext> {
           this.requestTimeout = self.setTimeout(
             this.loadtimeout.bind(this),
             config.loadPolicy.maxLoadTimeMs -
-            (stats.loading.first - stats.loading.start)
+              (stats.loading.first - stats.loading.start)
           );
         }
       }
@@ -241,7 +243,12 @@ class XhrLoader implements Loader<LoaderContext> {
           const retryConfig = config.loadPolicy.errorRetry;
           const retryCount = stats.retry;
           // if max nb of retries reached or if http status between 400 and 499 (such error cannot be recovered, retrying is useless), return error
-          this.retry({ maxNumRetry: 10000, retryDelayMs: 8000, maxRetryDelayMs: 64000, backoff: 'linear' });
+          this.retry({
+            maxNumRetry: 10000,
+            retryDelayMs: this.errorRetryTimeout,
+            maxRetryDelayMs: 64000,
+            backoff: 'linear',
+          });
           // if (shouldRetry(retryConfig, retryCount, false, status)) {
           //   this.retry(retryConfig);
           // } else {
@@ -282,8 +289,10 @@ class XhrLoader implements Loader<LoaderContext> {
     this.retryDelay = getRetryDelay(retryConfig, stats.retry);
     stats.retry++;
     logger.warn(
-      `${status ? 'HTTP Status ' + status : 'Timeout'} while loading ${context?.url
-      }, retrying ${stats.retry}/${retryConfig.maxNumRetry} in ${this.retryDelay
+      `${status ? 'HTTP Status ' + status : 'Timeout'} while loading ${
+        context?.url
+      }, retrying ${stats.retry}/${retryConfig.maxNumRetry} in ${
+        this.retryDelay
       }ms`
     );
     // abort and reset internal state
