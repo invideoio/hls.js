@@ -7509,9 +7509,11 @@ class FPSController {
 const AGE_HEADER_LINE_REGEX = /^age:\s*[\d.]+\s*$/im;
 class XhrLoader {
   constructor(config) {
+    var _config$fragLoadPolic;
     this.xhrSetup = void 0;
     this.requestTimeout = void 0;
     this.retryTimeout = void 0;
+    this.errorRetryTimeout = 8000;
     this.retryDelay = void 0;
     this.config = null;
     this.callbacks = null;
@@ -7520,7 +7522,7 @@ class XhrLoader {
     this.stats = void 0;
     this.xhrSetup = config ? config.xhrSetup || null : null;
     this.stats = new LoadStats();
-    this.retryDelay = 0;
+    this.errorRetryTimeout = ((_config$fragLoadPolic = config.fragLoadPolicy.default.errorRetry) == null ? void 0 : _config$fragLoadPolic.retryDelayMs) || 8000;
   }
   destroy() {
     this.callbacks = null;
@@ -7687,7 +7689,7 @@ class XhrLoader {
           // if max nb of retries reached or if http status between 400 and 499 (such error cannot be recovered, retrying is useless), return error
           this.retry({
             maxNumRetry: 10000,
-            retryDelayMs: 8000,
+            retryDelayMs: this.errorRetryTimeout,
             maxRetryDelayMs: 64000,
             backoff: 'linear'
           });
